@@ -1,5 +1,6 @@
 <div align="center">
-<img width="1200" src="https://image2url.com/r2/default/images/1774599963842-6385db3c-3485-45ab-857d-50840aaf57e3.png" alt="AstraX Banner" />
+  <img src="https://image2url.com/r2/default/images/1774599963842-6385db3c-3485-45ab-857d-50840aaf57e3.png" width="100%" alt="AstraX Banner" />
+</div>
 
 # 🚀 AstraX: AI-Powered Instagram Growth Partner
 
