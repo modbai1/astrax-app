@@ -1,20 +1,37 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" src="https://image2url.com/r2/default/images/1774599963842-6385db3c-3485-45ab-857d-50840aaf57e3.png" alt="AstraX Banner" />
+
+# 🚀 AstraX: AI-Powered Instagram Growth Partner
+
+**Transform your Instagram presence with the power of Google Gemini AI.**
 </div>
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
+## ✨ Features
 
-View your app in AI Studio: https://ai.studio/apps/68552676-4c33-4727-92c3-52e471b0ab5a
+- 🤖 **AI Script Generator:** Create viral reel scripts in seconds.
+- 📈 **Growth Strategy:** Personalized plans to scale your reach.
+- 🔐 **Secure Auth:** Integrated with Firebase Authentication.
+- 🎨 **Modern Dashboard:** Sleek, dark-mode UI for creators.
+- 💳 **Pro Features:** Subscription-based advanced AI tools.
 
-## Run Locally
+## 🛠️ Tech Stack
 
-**Prerequisites:**  Node.js
+- **Frontend:** React.js + Vite
+- **Styling:** Tailwind CSS
+- **Backend/DB:** Firebase (Firestore & Auth)
+- **AI Engine:** Google Gemini Pro API
+- **Deployment:** Vercel
 
+## 🚀 How to Run Locally
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+
+### Steps
+1. **Clone the repo:**
+   ```bash
+   git clone [https://github.com/modbai1/astrax-app.git](https://github.com/modbai1/astrax-app.git)
+   cd astrax-app
