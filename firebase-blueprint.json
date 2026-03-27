@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user account information, automation permissions, and growth plan data.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique Firebase user ID." },
+        "email": { "type": "string", "format": "email", "description": "User's email address." },
+        "displayName": { "type": "string", "description": "User's display name." },
+        "photoURL": { "type": "string", "description": "User's profile picture URL." },
+        "onboardingCompleted": { "type": "boolean", "description": "Whether the user has completed the onboarding process." },
+        "legalConsent": { "type": "boolean", "description": "Whether the user has accepted the legal terms for automation." },
+        "automationActive": { "type": "boolean", "description": "Whether automation features are currently active." },
+        "subscriptionPlan": { "type": "string", "enum": ["none", "free", "pro", "elite"], "description": "Current subscription tier." },
+        "niche": { "type": "string", "description": "User's content niche." },
+        "goal": { "type": "string", "description": "User's growth goal." },
+        "struggles": { "type": "string", "description": "User's current struggles." },
+        "healthScore": { "type": "number", "description": "AI-calculated profile health score." },
+        "growthPlan": { "type": "array", "items": { "type": "object" }, "description": "AI-generated 30-day growth plan." },
+        "aiGreeting": { "type": "string" },
+        "aiSummary": { "type": "string" },
+        "aiRecommendations": { "type": "array", "items": { "type": "string" } },
+        "completedDays": { "type": "array", "items": { "type": "integer" }, "description": "List of completed day numbers (1-30)." },
+        "initialStats": {
+          "type": "object",
+          "properties": {
+            "followers": { "type": "number" },
+            "avgViews": { "type": "number" },
+            "username": { "type": "string" },
+            "createdAt": { "type": "string", "format": "date-time" }
+          }
+        },
+        "currentStats": {
+          "type": "object",
+          "properties": {
+            "followers": { "type": "number" },
+            "avgViews": { "type": "number" },
+            "lastUpdated": { "type": "string", "format": "date-time" }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the profile was created." }
+      },
+      "required": ["uid", "email", "onboardingCompleted", "legalConsent", "automationActive", "subscriptionPlan"]
+    },
+    "DailyLog": {
+      "title": "Daily Log",
+      "description": "Stores daily follower and view counts for tracking growth.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "followers": { "type": "number" },
+        "views": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "date", "followers", "views", "createdAt"]
+    },
+    "BetaFeedback": {
+      "title": "Beta Feedback",
+      "description": "Stores user suggestions and feedback for the beta version.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User ID of the feedback author." },
+        "email": { "type": "string", "format": "email", "description": "User's email address." },
+        "suggestion": { "type": "string", "description": "The feedback or suggestion text." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the feedback was submitted." }
+      },
+      "required": ["uid", "email", "suggestion", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores individual user profile and permission data."
+    },
+    "/user_settings/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores growth plan and AI-generated strategy."
+    },
+    "/users/{userId}/daily_logs/{logId}": {
+      "schema": "DailyLog",
+      "description": "Stores daily growth data for a user."
+    },
+    "/beta_feedback/{feedbackId}": {
+      "schema": "BetaFeedback",
+      "description": "Stores user suggestions and feedback."
+    }
+  }
+}

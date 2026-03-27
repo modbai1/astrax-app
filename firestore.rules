@@ -1,0 +1,147 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (Firebase UID)
+    // Fields:
+    //   - uid: string (required) - Unique Firebase user ID
+    //   - email: string (required) - User's email
+    //   - displayName: string (optional) - User's name
+    //   - photoURL: string (optional) - Profile picture URL
+    //   - onboardingCompleted: bool (required) - Onboarding status
+    //   - legalConsent: bool (required) - T&C acceptance
+    //   - automationActive: bool (required) - Automation toggle
+    //   - createdAt: timestamp (required) - Creation time
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      let requiredFields = ['uid', 'email', 'onboardingCompleted', 'legalConsent', 'automationActive', 'subscriptionPlan'];
+      let optionalFields = [
+        'displayName', 'photoURL', 'role', 'niche', 'goal', 'struggles', 
+        'healthScore', 'growthPlan', 'completedDays', 'createdAt',
+        'instagramUrl', 'syncedData', 'followerCount', 'engagementRate',
+        'initialStats', 'currentStats', 'aiGreeting', 'aiSummary', 'aiRecommendations'
+      ];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().hasOnly(requiredFields.concat(optionalFields)) &&
+             data.uid is string &&
+             data.email is string &&
+             data.onboardingCompleted is bool &&
+             data.legalConsent is bool &&
+             data.automationActive is bool &&
+             data.subscriptionPlan in ['none', 'free', 'pro', 'elite'] &&
+             (!('healthScore' in data) || data.healthScore is number) &&
+             (!('completedDays' in data) || data.completedDays is list) &&
+             (!('instagramUrl' in data) || data.instagramUrl == null || data.instagramUrl is string) &&
+             (!('syncedData' in data) || data.syncedData == null || data.syncedData is map) &&
+             (!('initialStats' in data) || data.initialStats is map) &&
+             (!('currentStats' in data) || data.currentStats is map);
+    }
+
+    function isValidDailyLog(data) {
+      return data.uid == request.auth.uid &&
+             data.date is string &&
+             data.followers is number &&
+             data.views is number &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidUserSettings(data) {
+      let allowedFields = [
+        'growthPlan', 'healthScore', 'niche', 'goal', 'audience', 
+        'struggles', 'completedDays', 'updatedAt', 'subscriptionPlan', 
+        'igHandle', 'followerCount', 'engagementRate', 'contentType',
+        'aiGreeting', 'aiSummary', 'aiRecommendations'
+      ];
+      return data.keys().hasOnly(allowedFields) &&
+             (!('healthScore' in data) || data.healthScore is number) &&
+             (!('completedDays' in data) || data.completedDays is list) &&
+             (!('igHandle' in data) || data.igHandle is string) &&
+             (!('aiGreeting' in data) || data.aiGreeting is string) &&
+             (!('aiSummary' in data) || data.aiSummary is string) &&
+             (!('aiRecommendations' in data) || data.aiRecommendations is list);
+    }
+
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "arunpathak8912@gmail.com" && request.auth.token.email_verified == true)
+        );
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      // Users can only read their own profile
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can create their profile during onboarding
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && uidUnchanged();
+      
+      // Users can update their profile (e.g., toggle automation)
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && uidNotModified();
+      
+      // Users can delete their profile (Revoke Access)
+      allow delete: if isOwner(userId);
+
+      match /daily_logs/{logId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidDailyLog(request.resource.data);
+        allow update: if isOwner(userId) && isValidDailyLog(request.resource.data);
+      }
+    }
+
+    match /user_settings/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isValidUserSettings(request.resource.data);
+    }
+
+    match /beta_feedback/{feedbackId} {
+      // Any authenticated user can submit feedback
+      allow create: if isAuthenticated() && 
+                     request.resource.data.uid == request.auth.uid &&
+                     request.resource.data.suggestion is string &&
+                     request.resource.data.suggestion.size() > 0 &&
+                     request.resource.data.suggestion.size() < 2000;
+      
+      // Only admins can read feedback
+      allow read: if isAdmin();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
